@@ -22,8 +22,6 @@ func NewRouter() *mux.Router {
 	return r
 }
 
-
-
 func indexGetHandler(w http.ResponseWriter, r *http.Request) {
 	comments, err := models.GetComments()
 	if err != nil {
