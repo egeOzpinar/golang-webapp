@@ -1,7 +1,10 @@
 package models
 
 import (
+	"github.com/rs/zerolog/log"
 	"fmt"
+	"github.com/rs/zerolog"
+	"os"
 	"strconv"
 )
 
@@ -12,6 +15,7 @@ type Update struct {
 func NewUpdate(userId int64, body string) (*Update, error) {
 	id, err := client.Incr("update:next-id").Result()
 	if err != nil {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 		return nil, err
 	}
 	key := fmt.Sprintf("update:%d", id)
@@ -23,6 +27,7 @@ func NewUpdate(userId int64, body string) (*Update, error) {
 	pipe.LPush(fmt.Sprintf("user:%d:updates", userId), id)
 	_, err = pipe.Exec()
 	if err != nil {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 		return nil, err
 	}
 	return &Update{id}, nil
@@ -37,6 +42,7 @@ func (update *Update) GetUser() (*User, error) {
 	key := fmt.Sprintf("update:%d", update.id)
 	userId, err := client.HGet(key, "user_id").Int64()
 	if err != nil {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 		return nil, err
 	}
 	return GetUserById(userId)
@@ -51,6 +57,7 @@ func queryUpdates(key string) ([]*Update, error){
 	for i, strId := range updateIds {
 		id, err := strconv.Atoi(strId)
 		if err != nil {
+			log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 			return nil, err
 		}
 		updates[i] = &Update{int64(id)}

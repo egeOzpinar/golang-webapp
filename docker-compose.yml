@@ -1,0 +1,14 @@
+version: '3.4'
+
+services:
+  web:
+    build: .
+    network_mode: host
+    ports:
+      - 8080:8080
+
+  redis:
+    image: redis
+    network_mode: host
+    environment:
+      - REDIS_HOSTS=localhost:6379

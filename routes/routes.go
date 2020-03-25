@@ -1,12 +1,15 @@
 package routes
 
 import (
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"net/http"
 	"github.com/gorilla/mux"
 	"../middleware"
 	"../models"
 	"../sessions"
 	"../utils"
+	"os"
 )
 
 func NewRouter() *mux.Router {
@@ -27,6 +30,7 @@ func NewRouter() *mux.Router {
 func indexGetHandler(w http.ResponseWriter, r *http.Request) {
 	updates, err := models.GetAllUpdates()
 	if err != nil {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 		utils.InternalServerError(w)
 		return
 	}
@@ -46,6 +50,7 @@ func indexPostHandler(w http.ResponseWriter, r *http.Request) {
 	untypeduserId := session.Values["user_id"]
 	userId, ok := untypeduserId.(int64)
 	if !ok {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 		utils.InternalServerError(w)
         return
 	}
@@ -53,6 +58,7 @@ func indexPostHandler(w http.ResponseWriter, r *http.Request) {
 	body := r.PostForm.Get("update")
 	err := models.PostUpdate(userId, body)
 	if err != nil {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 		utils.InternalServerError(w)
         return
 	}
@@ -64,6 +70,7 @@ func userGetHandler(w http.ResponseWriter, r *http.Request) {
 	untypeduserId := session.Values["user_id"]
 	currentUserId, ok := untypeduserId.(int64)
 	if !ok {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 		utils.InternalServerError(w)
         return
 	}
@@ -71,16 +78,20 @@ func userGetHandler(w http.ResponseWriter, r *http.Request) {
 	username := vars["username"]
 	user, err := models.GetUserByUsername(username)
 	if err != nil {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 		utils.InternalServerError(w)
 		return
 	}
+
 	userId, err := user.GetId()
 	if err != nil {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 		utils.InternalServerError(w)
 		return
 	}
 	updates, err := models.GetUpdates(userId)
 	if err != nil {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 		utils.InternalServerError(w)
 		return
 	}
@@ -107,16 +118,21 @@ func loginPostHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case models.ErrUserNotFound:
+			log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 			utils.ExecuteTemplate(w, "login.html", "Unknown user")
+			log.Error().Msgf("error: %s\n", err.Error())
 		case models.ErrInvalidLogin:
+			log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 			utils.ExecuteTemplate(w, "login.html", "Invalid login")
 		default:
+			log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 			utils.InternalServerError(w)
 		}
 		return
 	}
 	userId, err := user.GetId()
 	if err != nil {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 		utils.InternalServerError(w)
 		return
 	}
@@ -143,9 +159,11 @@ func registerPostHandler(w http.ResponseWriter, r *http.Request) {
 	password := r.PostForm.Get("password")
 	err := models.RegisterUser(username, password)
 	if err == models.ErrUsernameTaken {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 		utils.ExecuteTemplate(w, "register.html", "Username taken")
 		return
 	} else if err != nil {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 		utils.InternalServerError(w)
         return
 	}
