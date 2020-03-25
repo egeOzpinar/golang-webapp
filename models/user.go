@@ -1,16 +1,16 @@
 package models
 
 import (
-	"fmt"
 	"errors"
-	"golang.org/x/crypto/bcrypt"
+	"fmt"
 	"github.com/go-redis/redis"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var (
 	ErrUserNotFound = errors.New("user not found")
 	ErrInvalidLogin = errors.New("invalid login")
-	ErrUsernameTaken = errors.New("Username taken")
+	ErrUsernameTaken = errors.New("username taken")
 )
 
 type User struct {
