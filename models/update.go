@@ -51,6 +51,7 @@ func (update *Update) GetUser() (*User, error) {
 func queryUpdates(key string) ([]*Update, error){
 	updateIds, err := client.LRange(key, 0, 10).Result()
 	if err != nil {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 		return nil, err
 	}
 	updates := make([]*Update, len(updateIds))
